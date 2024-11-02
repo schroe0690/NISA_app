@@ -49,7 +49,7 @@ if submit_btm:
     # 詳細表示
     col3, col4, col5 = st.columns(3)
     with col3:
-        st.metric(label='総投資額', value=f'{round(12 * accumulation * t_max)}万円')
+        st.metric(label='総投資額', value=f'{round(12 * accumulation * (t_max-start_age))}万円')
     with col4:
         st.metric(label='積み立て終了年齢', value=f'約{round(t_max)}歳')
     with col5:
