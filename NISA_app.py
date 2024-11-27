@@ -2,7 +2,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from investment_functions import adjusted_fg, calc_amount, calc_t_max, convert_fg_to_np
+from investment_functions import create_S_by_subs, get_conn_point, convert_f_to_np
 
 # タイトル
 st.title('積み立てNISAシミュレーション')
@@ -32,14 +32,16 @@ with st.form(key='profile_form'):
 # ボタンを押したときの処理
 if submit_btm:
     # 計算
-    fg = adjusted_fg(accumulation, withdrawal, yeild_y, start_age, end_age)
-    t_max = calc_t_max(accumulation, withdrawal, yeild_y, start_age, end_age)
-    max_amount = calc_amount(fg, t_max)
+    accumulation = 12 * accumulation
+    withdrawal = -12 * withdrawal
+    yeild_y = float(yeild_y) / 100
+    S = create_S_by_subs(accumulation, withdrawal, start_age, end_age, yeild_y)
+    t_max, S_max = get_conn_point(S)
     
-    # 変換
-    fg_numpy = convert_fg_to_np(fg)
+    # グラフ用に変換
+    S_numpy = convert_f_to_np(S)
     t = np.linspace(start_age, end_age, 1000)
-    df = pd.DataFrame({'年齢': t, '資産（万円）': fg_numpy(t)})
+    df = pd.DataFrame({'年齢': t, '資産（万円）': S_numpy(t)})
     
     # プロット
     st.subheader('資産の推移')
@@ -49,9 +51,9 @@ if submit_btm:
     # 詳細表示
     col3, col4, col5 = st.columns(3)
     with col3:
-        st.metric(label='総投資額', value=f'{round(12 * accumulation * (t_max-start_age))}万円')
+        st.metric(label='総投資額', value=f'{round(accumulation * (t_max-start_age))}万円')
     with col4:
         st.metric(label='積み立て終了年齢', value=f'約{round(t_max)}歳')
     with col5:
-        st.metric(label='積み立て終了時資産', value=f'{round(max_amount)}万円')
+        st.metric(label='積み立て終了時資産', value=f'{round(S_max)}万円')
             
